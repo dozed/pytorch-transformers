@@ -34,10 +34,10 @@ from torch.nn import CrossEntropyLoss, MSELoss
 
 from tensorboardX import SummaryWriter
 
-from pytorch_pretrained_bert.file_utils import WEIGHTS_NAME, CONFIG_NAME
-from pytorch_pretrained_bert.modeling import BertForSequenceClassification
-from pytorch_pretrained_bert.tokenization import BertTokenizer
-from pytorch_pretrained_bert.optimization import BertAdam, WarmupLinearSchedule
+from pytorch_transformers.modeling_utils import WEIGHTS_NAME, CONFIG_NAME
+from pytorch_transformers.modeling_bert import BertForSequenceClassification
+from pytorch_transformers.tokenization_bert import BertTokenizer
+from pytorch_transformers.optimization import AdamW, WarmupLinearSchedule
 
 from run_classifier_dataset_utils import processors, output_modes, convert_examples_to_features, compute_metrics
 
@@ -309,7 +309,7 @@ def main():
                                                  t_total=num_train_optimization_steps)
 
         else:
-            optimizer = BertAdam(optimizer_grouped_parameters,
+            optimizer = AdamW(optimizer_grouped_parameters,
                                  lr=args.learning_rate,
                                  warmup=args.warmup_proportion,
                                  t_total=num_train_optimization_steps)
@@ -353,7 +353,7 @@ def main():
                 if (step + 1) % args.gradient_accumulation_steps == 0:
                     if args.fp16:
                         # modify learning rate with special warm up BERT uses
-                        # if args.fp16 is False, BertAdam is used that handles this automatically
+                        # if args.fp16 is False, AdamW is used that handles this automatically
                         lr_this_step = args.learning_rate * warmup_linear.get_lr(global_step, args.warmup_proportion)
                         for param_group in optimizer.param_groups:
                             param_group['lr'] = lr_this_step
