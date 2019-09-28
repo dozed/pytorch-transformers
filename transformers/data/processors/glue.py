@@ -17,6 +17,7 @@
 
 import logging
 import os
+import csv
 
 from .utils import DataProcessor, InputExample, InputFeatures
 from ...file_utils import is_tf_available
@@ -35,7 +36,8 @@ def glue_convert_examples_to_features(examples, tokenizer,
                                       pad_on_left=False,
                                       pad_token=0,
                                       pad_token_segment_id=0,
-                                      mask_padding_with_zero=True):
+                                      mask_padding_with_zero=True,
+                                      filter_long_sequences=False):
     """
     Loads a data file into a list of ``InputFeatures``
 
@@ -52,6 +54,7 @@ def glue_convert_examples_to_features(examples, tokenizer,
         mask_padding_with_zero: If set to ``True``, the attention mask will be filled by ``1`` for actual values
             and by ``0`` for padded values. If set to ``False``, inverts it (``1`` for padded values, ``0`` for
             actual values)
+        filter_long_sequences: If set to true, sequences longer than max_length are skipped
 
     Returns:
         If the ``examples`` input is a ``tf.data.Dataset``, will return a ``tf.data.Dataset``
@@ -92,6 +95,11 @@ def glue_convert_examples_to_features(examples, tokenizer,
             truncate_first_sequence=True  # We're truncating the first sequence in priority
         )
         input_ids, token_type_ids = inputs["input_ids"], inputs["token_type_ids"]
+
+        if filter_long_sequences:
+            if len(input_ids) > max_length:
+                # skip this example
+                continue
 
         # The mask has 1 for real tokens and 0 for padding tokens. Only real
         # tokens are attended to.
@@ -453,6 +461,47 @@ class WnliProcessor(DataProcessor):
                 InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
         return examples
 
+class SameStanceProcessor(DataProcessor):
+    """Processor for the same stance data set."""
+
+    def read_csv(self, input_file):
+        with open(input_file, "r", encoding="utf-8") as f:
+            reader = csv.reader(f, delimiter=",", quotechar="\"", escapechar='\\')
+            lines = []
+            for line in reader:
+                lines.append(line)
+            return lines
+
+    def create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            if i == 0:
+                continue
+            guid = "%s-%s" % (set_type, i)
+            text_a = line[1]
+            text_b = line[3]
+            label = "0" if line[6] == "False" else "1"
+            examples.append(
+                InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+        return examples
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        logger.info("LOOKING AT {}".format(os.path.join(data_dir, "training.csv")))
+        return self.create_examples(
+            self.read_csv(os.path.join(data_dir, "training.csv")), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self.create_examples(
+            self.read_csv(os.path.join(data_dir, "test.csv")), "dev")
+
+    def get_labels(self):
+        """See base class."""
+        return ["0", "1"]
+
+
 glue_tasks_num_labels = {
     "cola": 2,
     "mnli": 3,
@@ -463,6 +512,7 @@ glue_tasks_num_labels = {
     "qnli": 2,
     "rte": 2,
     "wnli": 2,
+    "ssc": 2,
 }
 
 glue_processors = {
@@ -476,6 +526,7 @@ glue_processors = {
     "qnli": QnliProcessor,
     "rte": RteProcessor,
     "wnli": WnliProcessor,
+    "ssc": SameStanceProcessor,
 }
 
 glue_output_modes = {
@@ -489,4 +540,5 @@ glue_output_modes = {
     "qnli": "classification",
     "rte": "classification",
     "wnli": "classification",
+    "ssc": "classification",
 }
