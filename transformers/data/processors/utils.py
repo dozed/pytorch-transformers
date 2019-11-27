@@ -86,6 +86,15 @@ class InputFeatures(object):
 class DataProcessor(object):
     """Base class for data converters for sequence classification data sets."""
 
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """Gets an example from a dict with tensorflow tensors
+
+        Args:
+            tensor_dict: Keys and values should match the corresponding Glue
+                tensorflow_dataset examples.
+        """
+        raise NotImplementedError()
+
     def get_train_examples(self, data_dir):
         """Gets a collection of `InputExample`s for the train set."""
         raise NotImplementedError()
@@ -97,6 +106,13 @@ class DataProcessor(object):
     def get_labels(self):
         """Gets the list of labels for this data set."""
         raise NotImplementedError()
+
+    def tfds_map(self, example):
+        """Some tensorflow_datasets datasets are not formatted the same way the GLUE datasets are. 
+        This method converts examples to the correct format."""
+        if len(self.get_labels()) > 1:
+            example.label = self.get_labels()[int(example.label)]
+        return example
 
     @classmethod
     def _read_tsv(cls, input_file, quotechar=None):

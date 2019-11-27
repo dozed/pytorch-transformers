@@ -19,12 +19,12 @@ The library was designed with two strong goals in mind:
 
 A few other goals:
 
-- expose the models internals as consistently as possible:
+- expose the models' internals as consistently as possible:
 
   - we give access, using a single API to the full hidden-states and attention weights,
   - tokenizer and base model's API are standardized to easily switch between models.
 
-- incorporate a subjective selection of promising tools for fine-tuning/investiguating these models:
+- incorporate a subjective selection of promising tools for fine-tuning/investigating these models:
 
   - a simple/consistent way to add new tokens to the vocabulary and embeddings for fine-tuning,
   - simple ways to mask and prune transformer heads.
@@ -33,7 +33,7 @@ A few other goals:
 
 The library is build around three type of classes for each models:
 
-- **model classes** which are PyTorch models (`torch.nn.Modules`) of the 6 models architectures currently provided in the library, e.g. `BertModel`
+- **model classes** which are PyTorch models (`torch.nn.Modules`) of the 8 models architectures currently provided in the library, e.g. `BertModel`
 - **configuration classes** which store all the parameters required to build a model, e.g. `BertConfig`. You don't always need to instantiate these your-self, in particular if you are using a pretrained model without any modification, creating the model will automatically take care of instantiating the configuration (which is part of the model)
 - **tokenizer classes** which store the vocabulary for each model and provide methods for encoding/decoding strings in list of token embeddings indices to be fed to a model, e.g. `BertTokenizer`
 
@@ -51,7 +51,7 @@ We'll finish this quickstart tour by going through a few simple quick-start exam
 
 Here are two examples showcasing a few `Bert` and `GPT2` classes and pre-trained models.
 
-See full API reference for examples for each model classe.
+See full API reference for examples for each model class.
 
 ### BERT example
 
@@ -188,3 +188,35 @@ assert predicted_text == 'Who was Jim Henson? Jim Henson was a man'
 ```
 
 Examples for each model class of each model architecture (Bert, GPT, GPT-2, Transformer-XL, XLNet and XLM) can be found in the [documentation](#documentation).
+
+#### Using the past
+
+GPT-2 as well as some other models (GPT, XLNet, Transfo-XL, CTRL) make use of a `past` or `mems` attribute which can be used to prevent re-computing the key/value pairs when using sequential decoding. It is useful when generating sequences as a big part of the attention mechanism benefits from previous computations.
+
+Here is a fully-working example using the `past` with `GPT2LMHeadModel` and argmax decoding (which should only be used as an example, as argmax decoding introduces a lot of repetition):
+
+```python
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import torch
+
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+model = GPT2LMHeadModel.from_pretrained('gpt2')
+
+generated = tokenizer.encode("The Manhattan bridge")
+context = torch.tensor([generated])
+past = None
+
+for i in range(100):
+    print(i)
+    output, past = model(context, past=past)
+    token = torch.argmax(output[0, :])
+
+    generated += [token.tolist()]
+    context = token.unsqueeze(0)
+
+sequence = tokenizer.decode(generated)
+
+print(sequence)
+```
+
+The model only requires a single token as input as all the previous tokens' key/value pairs are contained in the `past`.

@@ -21,11 +21,13 @@ import logging
 from .modeling_bert import BertModel, BertForMaskedLM, BertForSequenceClassification, BertForQuestionAnswering
 from .modeling_openai import OpenAIGPTModel, OpenAIGPTLMHeadModel
 from .modeling_gpt2 import GPT2Model, GPT2LMHeadModel
+from .modeling_ctrl import CTRLModel, CTRLLMHeadModel
 from .modeling_transfo_xl import TransfoXLModel, TransfoXLLMHeadModel
 from .modeling_xlnet import XLNetModel, XLNetLMHeadModel, XLNetForSequenceClassification, XLNetForQuestionAnswering
 from .modeling_xlm import XLMModel, XLMWithLMHeadModel, XLMForSequenceClassification, XLMForQuestionAnswering
 from .modeling_roberta import RobertaModel, RobertaForMaskedLM, RobertaForSequenceClassification
 from .modeling_distilbert import DistilBertModel, DistilBertForQuestionAnswering, DistilBertForMaskedLM, DistilBertForSequenceClassification
+from .modeling_camembert import CamembertModel, CamembertForMaskedLM, CamembertForSequenceClassification, CamembertForMultipleChoice
 
 from .modeling_utils import PreTrainedModel, SequenceSummary
 
@@ -47,10 +49,12 @@ class AutoModel(object):
         The base model class to instantiate is selected as the first pattern matching
         in the `pretrained_model_name_or_path` string (in the following order):
             - contains `distilbert`: DistilBertModel (DistilBERT model)
+            - contains `camembert`: CamembertModel (CamemBERT model)
             - contains `roberta`: RobertaModel (RoBERTa model)
             - contains `bert`: BertModel (Bert model)
             - contains `openai-gpt`: OpenAIGPTModel (OpenAI GPT model)
             - contains `gpt2`: GPT2Model (OpenAI GPT-2 model)
+            - contains `ctrl`: CTRLModel (Salesforce CTRL  model)
             - contains `transfo-xl`: TransfoXLModel (Transformer-XL model)
             - contains `xlnet`: XLNetModel (XLNet model)
             - contains `xlm`: XLMModel (XLM model)
@@ -69,10 +73,12 @@ class AutoModel(object):
         The model class to instantiate is selected as the first pattern matching
         in the `pretrained_model_name_or_path` string (in the following order):
             - contains `distilbert`: DistilBertModel (DistilBERT model)
+            - contains `camembert`: CamembertModel (CamemBERT model)
             - contains `roberta`: RobertaModel (RoBERTa model)
             - contains `bert`: BertModel (Bert model)
             - contains `openai-gpt`: OpenAIGPTModel (OpenAI GPT model)
             - contains `gpt2`: GPT2Model (OpenAI GPT-2 model)
+            - contains `ctrl`: CTRLModel (Salesforce CTRL  model)
             - contains `transfo-xl`: TransfoXLModel (Transformer-XL model)
             - contains `xlnet`: XLNetModel (XLNet model)
             - contains `xlm`: XLMModel (XLM model)
@@ -135,6 +141,8 @@ class AutoModel(object):
         """
         if 'distilbert' in pretrained_model_name_or_path:
             return DistilBertModel.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
+        elif 'camembert' in pretrained_model_name_or_path:
+            return CamembertModel.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         elif 'roberta' in pretrained_model_name_or_path:
             return RobertaModel.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         elif 'bert' in pretrained_model_name_or_path:
@@ -149,10 +157,11 @@ class AutoModel(object):
             return XLNetModel.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         elif 'xlm' in pretrained_model_name_or_path:
             return XLMModel.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
-
+        elif 'ctrl' in pretrained_model_name_or_path:
+            return CTRLModel.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         raise ValueError("Unrecognized model identifier in {}. Should contains one of "
                          "'bert', 'openai-gpt', 'gpt2', 'transfo-xl', 'xlnet', "
-                         "'xlm', 'roberta'".format(pretrained_model_name_or_path))
+                         "'xlm', 'roberta, 'ctrl'".format(pretrained_model_name_or_path))
 
 
 class AutoModelWithLMHead(object):
@@ -168,10 +177,12 @@ class AutoModelWithLMHead(object):
         The model class to instantiate is selected as the first pattern matching
         in the `pretrained_model_name_or_path` string (in the following order):
             - contains `distilbert`: DistilBertForMaskedLM (DistilBERT model)
+            - contains `camembert`: CamembertForMaskedLM (CamemBERT model)
             - contains `roberta`: RobertaForMaskedLM (RoBERTa model)
             - contains `bert`: BertForMaskedLM (Bert model)
             - contains `openai-gpt`: OpenAIGPTLMHeadModel (OpenAI GPT model)
             - contains `gpt2`: GPT2LMHeadModel (OpenAI GPT-2 model)
+            - contains `ctrl`: CTRLLMModel (Salesforce CTRL model)
             - contains `transfo-xl`: TransfoXLLMHeadModel (Transformer-XL model)
             - contains `xlnet`: XLNetLMHeadModel (XLNet model)
             - contains `xlm`: XLMWithLMHeadModel (XLM model)
@@ -193,6 +204,7 @@ class AutoModelWithLMHead(object):
         The model class to instantiate is selected as the first pattern matching
         in the `pretrained_model_name_or_path` string (in the following order):
             - contains `distilbert`: DistilBertForMaskedLM (DistilBERT model)
+            - contains `camembert`: CamembertForMaskedLM (CamemBERT model)
             - contains `roberta`: RobertaForMaskedLM (RoBERTa model)
             - contains `bert`: BertForMaskedLM (Bert model)
             - contains `openai-gpt`: OpenAIGPTLMHeadModel (OpenAI GPT model)
@@ -259,6 +271,8 @@ class AutoModelWithLMHead(object):
         """
         if 'distilbert' in pretrained_model_name_or_path:
             return DistilBertForMaskedLM.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
+        elif 'camembert' in pretrained_model_name_or_path:
+            return CamembertForMaskedLM.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         elif 'roberta' in pretrained_model_name_or_path:
             return RobertaForMaskedLM.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         elif 'bert' in pretrained_model_name_or_path:
@@ -273,10 +287,11 @@ class AutoModelWithLMHead(object):
             return XLNetLMHeadModel.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         elif 'xlm' in pretrained_model_name_or_path:
             return XLMWithLMHeadModel.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
-
+        elif 'ctrl' in pretrained_model_name_or_path:
+            return CTRLLMHeadModel.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         raise ValueError("Unrecognized model identifier in {}. Should contains one of "
                          "'bert', 'openai-gpt', 'gpt2', 'transfo-xl', 'xlnet', "
-                         "'xlm', 'roberta'".format(pretrained_model_name_or_path))
+                         "'xlm', 'roberta','ctrl'".format(pretrained_model_name_or_path))
 
 
 class AutoModelForSequenceClassification(object):
@@ -292,6 +307,7 @@ class AutoModelForSequenceClassification(object):
         The model class to instantiate is selected as the first pattern matching
         in the `pretrained_model_name_or_path` string (in the following order):
             - contains `distilbert`: DistilBertForSequenceClassification (DistilBERT model)
+            - contains `camembert`: CamembertForSequenceClassification (CamemBERT model)
             - contains `roberta`: RobertaForSequenceClassification (RoBERTa model)
             - contains `bert`: BertForSequenceClassification (Bert model)
             - contains `xlnet`: XLNetForSequenceClassification (XLNet model)
@@ -314,6 +330,7 @@ class AutoModelForSequenceClassification(object):
         The model class to instantiate is selected as the first pattern matching
         in the `pretrained_model_name_or_path` string (in the following order):
             - contains `distilbert`: DistilBertForSequenceClassification (DistilBERT model)
+            - contains `camembert`: CamembertForSequenceClassification (CamemBERT model)
             - contains `roberta`: RobertaForSequenceClassification (RoBERTa model)
             - contains `bert`: BertForSequenceClassification (Bert model)
             - contains `xlnet`: XLNetForSequenceClassification (XLNet model)
@@ -377,6 +394,8 @@ class AutoModelForSequenceClassification(object):
         """
         if 'distilbert' in pretrained_model_name_or_path:
             return DistilBertForSequenceClassification.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
+        elif 'camembert' in pretrained_model_name_or_path:
+            return CamembertForSequenceClassification.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         elif 'roberta' in pretrained_model_name_or_path:
             return RobertaForSequenceClassification.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         elif 'bert' in pretrained_model_name_or_path:

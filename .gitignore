@@ -118,6 +118,7 @@ dmypy.json
 # vscode
 .vscode
 
+# Pycharm
 .idea
 
 # TF code
@@ -130,3 +131,11 @@ proc_data
 # examples
 runs
 examples/runs
+
+# data
+/data
+serialization_dir
+
+# emacs
+*.*~
+debug.env

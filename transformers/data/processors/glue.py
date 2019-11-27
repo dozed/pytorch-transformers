@@ -82,17 +82,14 @@ def glue_convert_examples_to_features(examples, tokenizer,
         if ex_index % 10000 == 0:
             logger.info("Writing example %d" % (ex_index))
         if is_tf_dataset:
-            example = InputExample(example['idx'].numpy(),
-                                   example['sentence1'].numpy().decode('utf-8'),
-                                   example['sentence2'].numpy().decode('utf-8'),
-                                   str(example['label'].numpy()))
+            example = processor.get_example_from_tensor_dict(example)
+            example = processor.tfds_map(example)
 
         inputs = tokenizer.encode_plus(
             example.text_a,
             example.text_b,
             add_special_tokens=True,
             max_length=max_length,
-            truncate_first_sequence=True  # We're truncating the first sequence in priority
         )
         input_ids, token_type_ids = inputs["input_ids"], inputs["token_type_ids"]
 
@@ -165,6 +162,13 @@ def glue_convert_examples_to_features(examples, tokenizer,
 class MrpcProcessor(DataProcessor):
     """Processor for the MRPC data set (GLUE version)."""
 
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """See base class."""
+        return InputExample(tensor_dict['idx'].numpy(),
+                            tensor_dict['sentence1'].numpy().decode('utf-8'),
+                            tensor_dict['sentence2'].numpy().decode('utf-8'),
+                            str(tensor_dict['label'].numpy()))
+
     def get_train_examples(self, data_dir):
         """See base class."""
         logger.info("LOOKING AT {}".format(os.path.join(data_dir, "train.tsv")))
@@ -197,6 +201,13 @@ class MrpcProcessor(DataProcessor):
 
 class MnliProcessor(DataProcessor):
     """Processor for the MultiNLI data set (GLUE version)."""
+
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """See base class."""
+        return InputExample(tensor_dict['idx'].numpy(),
+                            tensor_dict['premise'].numpy().decode('utf-8'),
+                            tensor_dict['hypothesis'].numpy().decode('utf-8'),
+                            str(tensor_dict['label'].numpy()))
 
     def get_train_examples(self, data_dir):
         """See base class."""
@@ -241,6 +252,13 @@ class MnliMismatchedProcessor(MnliProcessor):
 class ColaProcessor(DataProcessor):
     """Processor for the CoLA data set (GLUE version)."""
 
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """See base class."""
+        return InputExample(tensor_dict['idx'].numpy(),
+                            tensor_dict['sentence'].numpy().decode('utf-8'),
+                            None,
+                            str(tensor_dict['label'].numpy()))
+
     def get_train_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
@@ -269,6 +287,13 @@ class ColaProcessor(DataProcessor):
 
 class Sst2Processor(DataProcessor):
     """Processor for the SST-2 data set (GLUE version)."""
+
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """See base class."""
+        return InputExample(tensor_dict['idx'].numpy(),
+                            tensor_dict['sentence'].numpy().decode('utf-8'),
+                            None,
+                            str(tensor_dict['label'].numpy()))
 
     def get_train_examples(self, data_dir):
         """See base class."""
@@ -301,6 +326,13 @@ class Sst2Processor(DataProcessor):
 class StsbProcessor(DataProcessor):
     """Processor for the STS-B data set (GLUE version)."""
 
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """See base class."""
+        return InputExample(tensor_dict['idx'].numpy(),
+                            tensor_dict['sentence1'].numpy().decode('utf-8'),
+                            tensor_dict['sentence2'].numpy().decode('utf-8'),
+                            str(tensor_dict['label'].numpy()))
+
     def get_train_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
@@ -332,6 +364,13 @@ class StsbProcessor(DataProcessor):
 
 class QqpProcessor(DataProcessor):
     """Processor for the QQP data set (GLUE version)."""
+
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """See base class."""
+        return InputExample(tensor_dict['idx'].numpy(),
+                            tensor_dict['question1'].numpy().decode('utf-8'),
+                            tensor_dict['question2'].numpy().decode('utf-8'),
+                            str(tensor_dict['label'].numpy()))
 
     def get_train_examples(self, data_dir):
         """See base class."""
@@ -368,6 +407,13 @@ class QqpProcessor(DataProcessor):
 class QnliProcessor(DataProcessor):
     """Processor for the QNLI data set (GLUE version)."""
 
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """See base class."""
+        return InputExample(tensor_dict['idx'].numpy(),
+                            tensor_dict['question'].numpy().decode('utf-8'),
+                            tensor_dict['sentence'].numpy().decode('utf-8'),
+                            str(tensor_dict['label'].numpy()))
+
     def get_train_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
@@ -401,6 +447,13 @@ class QnliProcessor(DataProcessor):
 class RteProcessor(DataProcessor):
     """Processor for the RTE data set (GLUE version)."""
 
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """See base class."""
+        return InputExample(tensor_dict['idx'].numpy(),
+                            tensor_dict['sentence1'].numpy().decode('utf-8'),
+                            tensor_dict['sentence2'].numpy().decode('utf-8'),
+                            str(tensor_dict['label'].numpy()))
+
     def get_train_examples(self, data_dir):
         """See base class."""
         return self._create_examples(
@@ -432,6 +485,13 @@ class RteProcessor(DataProcessor):
 
 class WnliProcessor(DataProcessor):
     """Processor for the WNLI data set (GLUE version)."""
+
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """See base class."""
+        return InputExample(tensor_dict['idx'].numpy(),
+                            tensor_dict['sentence1'].numpy().decode('utf-8'),
+                            tensor_dict['sentence2'].numpy().decode('utf-8'),
+                            str(tensor_dict['label'].numpy()))
 
     def get_train_examples(self, data_dir):
         """See base class."""
