@@ -6,7 +6,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5 PYTHONPATH=.. python3 ../examples/run_glue.py \
   --do_eval \
   --do_lower_case \
   --data_dir ~/data-train \
-  --bert_model bert-base-uncased \
   --model_type bert \
   --model_name_or_path bert-base-uncased \
   --max_seq_length 128 \
