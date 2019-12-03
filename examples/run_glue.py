@@ -307,6 +307,7 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False):
                                                 pad_on_left=bool(args.model_type in ['xlnet']),                 # pad on the left for xlnet
                                                 pad_token=tokenizer.convert_tokens_to_ids([tokenizer.pad_token])[0],
                                                 pad_token_segment_id=4 if args.model_type in ['xlnet'] else 0,
+                                                filter_long_sequences=args.filter_long_sequences,
         )
         if args.local_rank in [-1, 0]:
             logger.info("Saving features into cached file %s", cached_features_file)
@@ -353,6 +354,8 @@ def main():
     parser.add_argument("--max_seq_length", default=128, type=int,
                         help="The maximum total input sequence length after tokenization. Sequences longer "
                              "than this will be truncated, sequences shorter will be padded.")
+    parser.add_argument("--filter_long_sequences", action='store_true',
+                        help="If set sequences longer as max_seq_length are filtered instead of truncated.")
     parser.add_argument("--do_train", action='store_true',
                         help="Whether to run training.")
     parser.add_argument("--do_eval", action='store_true',
