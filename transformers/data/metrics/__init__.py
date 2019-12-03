@@ -81,5 +81,7 @@ if _has_sklearn:
             return {"acc": simple_accuracy(preds, labels)}
         elif task_name == "ssc":
             return {"acc": simple_accuracy(preds, labels)}
+        elif task_name == "snli-german":
+            return {"acc": simple_accuracy(preds, labels)}
         else:
             raise KeyError(task_name)
