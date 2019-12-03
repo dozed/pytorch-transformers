@@ -595,6 +595,38 @@ class SnliGermanProcessor(DataProcessor):
         return examples
 
 
+class MnliGermanProcessor(DataProcessor):
+    """Processor for the MNLI german data set."""
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self.create_examples(os.path.join(data_dir, "multinli_1.0_train.csv"), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self.create_examples(os.path.join(data_dir, "multinli_1.0_dev_matched.csv"), "dev")
+
+    def get_labels(self):
+        """See base class."""
+        return ["contradiction", "entailment", "neutral"]
+
+    def create_examples(self, input_file, set_type):
+        """Creates examples for the training and dev sets."""
+
+        df = pd.read_csv(input_file, na_filter=False)
+        df = df[df['gold_label'] != '-']
+
+        examples = []
+        for i, row in df.iterrows():
+            guid = "%s-%s" % (set_type, i)
+            text_a = row['sentence1']
+            text_b = row['sentence2']
+            label = row['gold_label']
+            examples.append(
+                InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+        return examples
+
+
 
 
 glue_tasks_num_labels = {
@@ -609,6 +641,7 @@ glue_tasks_num_labels = {
     "wnli": 2,
     "ssc": 2,
     "snli-german": 3,
+    "mnli-german": 3,
 }
 
 glue_processors = {
@@ -624,6 +657,7 @@ glue_processors = {
     "wnli": WnliProcessor,
     "ssc": SameStanceProcessor,
     "snli-german": SnliGermanProcessor,
+    "mnli-german": MnliGermanProcessor,
 }
 
 glue_output_modes = {
@@ -639,4 +673,5 @@ glue_output_modes = {
     "wnli": "classification",
     "ssc": "classification",
     "snli-german": "classification",
+    "mnli-german": "classification",
 }
