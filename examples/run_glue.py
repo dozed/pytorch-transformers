@@ -215,7 +215,7 @@ def evaluate(args, model, tokenizer, prefix=""):
 
     results = {}
     for eval_task, eval_output_dir in zip(eval_task_names, eval_outputs_dirs):
-        eval_dataset = load_and_cache_examples(args, eval_task, tokenizer, evaluate=True)
+        eval_dataset = load_and_cache_examples(args, eval_task, tokenizer, evaluate=True, filter_long_sequences=args.filter_long_sequences_eval)
 
         if not os.path.exists(eval_output_dir) and args.local_rank in [-1, 0]:
             os.makedirs(eval_output_dir)
@@ -277,7 +277,7 @@ def evaluate(args, model, tokenizer, prefix=""):
     return results
 
 
-def load_and_cache_examples(args, task, tokenizer, evaluate=False):
+def load_and_cache_examples(args, task, tokenizer, evaluate=False, filter_long_sequences=False):
     if args.local_rank not in [-1, 0] and not evaluate:
         torch.distributed.barrier()  # Make sure only the first process in distributed training process the dataset, and the others will use the cache
 
@@ -307,7 +307,7 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False):
                                                 pad_on_left=bool(args.model_type in ['xlnet']),                 # pad on the left for xlnet
                                                 pad_token=tokenizer.convert_tokens_to_ids([tokenizer.pad_token])[0],
                                                 pad_token_segment_id=4 if args.model_type in ['xlnet'] else 0,
-                                                filter_long_sequences=args.filter_long_sequences,
+                                                filter_long_sequences=filter_long_sequences,
         )
         if args.local_rank in [-1, 0]:
             logger.info("Saving features into cached file %s", cached_features_file)
@@ -354,8 +354,10 @@ def main():
     parser.add_argument("--max_seq_length", default=128, type=int,
                         help="The maximum total input sequence length after tokenization. Sequences longer "
                              "than this will be truncated, sequences shorter will be padded.")
-    parser.add_argument("--filter_long_sequences", action='store_true',
-                        help="If set sequences longer as max_seq_length are filtered instead of truncated.")
+    parser.add_argument("--filter_long_sequences_train", action='store_true',
+                        help="If set train sequences longer as max_seq_length are filtered instead of truncated.")
+    parser.add_argument("--filter_long_sequences_eval", action='store_true',
+                        help="If set eval sequences longer as max_seq_length are filtered instead of truncated.")
     parser.add_argument("--do_train", action='store_true',
                         help="Whether to run training.")
     parser.add_argument("--do_eval", action='store_true',
@@ -481,7 +483,7 @@ def main():
 
     # Training
     if args.do_train:
-        train_dataset = load_and_cache_examples(args, args.task_name, tokenizer, evaluate=False)
+        train_dataset = load_and_cache_examples(args, args.task_name, tokenizer, evaluate=False, filter_long_sequences=args.filter_long_sequences_train)
         global_step, tr_loss = train(args, train_dataset, model, tokenizer)
         logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
 
