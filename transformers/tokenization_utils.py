@@ -741,6 +741,7 @@ class PreTrainedTokenizer(object):
                     stride=0,
                     truncation_strategy='longest_first',
                     return_tensors=None,
+                    filter_long_sequences=False,
                     **kwargs):
         """
         Returns a dictionary containing the encoded sequence or sequence pair and additional informations:
@@ -765,6 +766,7 @@ class PreTrainedTokenizer(object):
                 - 'only_first': Only truncate the first sequence
                 - 'only_second': Only truncate the second sequence
                 - 'do_not_truncate': Does not truncate (raise an error if the input sequence is longer than max_length)
+            filter_long_sequences: skip examples which are longer than max_length
             return_tensors: (optional) can be set to 'tf' or 'pt' to return respectively TensorFlow tf.constant
                 or PyTorch torch.Tensor instead of a list of python integers.
             **kwargs: passed to the `self.tokenize()` method
@@ -789,10 +791,11 @@ class PreTrainedTokenizer(object):
                                       add_special_tokens=add_special_tokens,
                                       stride=stride,
                                       truncation_strategy=truncation_strategy,
-                                      return_tensors=return_tensors)
+                                      return_tensors=return_tensors,
+                                      filter_long_sequences=filter_long_sequences)
 
     def prepare_for_model(self, ids, pair_ids=None, max_length=None, add_special_tokens=True, stride=0,
-                          truncation_strategy='longest_first', return_tensors=None):
+                          truncation_strategy='longest_first', return_tensors=None, filter_long_sequences=False):
         """
         Prepares a sequence of input id, or a pair of sequences of inputs ids so that it can be used by the model.
         It adds special tokens, truncates
@@ -815,6 +818,7 @@ class PreTrainedTokenizer(object):
                 - 'only_first': Only truncate the first sequence
                 - 'only_second': Only truncate the second sequence
                 - 'do_not_truncate': Does not truncate (raise an error if the input sequence is longer than max_length)
+            filter_long_sequences: skip examples which are longer than max_length
             return_tensors: (optional) can be set to 'tf' or 'pt' to return respectively TensorFlow tf.constant
                 or PyTorch torch.Tensor instead of a list of python integers.
 
@@ -841,6 +845,10 @@ class PreTrainedTokenizer(object):
 
         encoded_inputs = {}
         total_len = len_ids + len_pair_ids + (self.num_added_tokens(pair=pair) if add_special_tokens else 0)
+
+        if filter_long_sequences and max_length and total_len > max_length:
+            return None
+
         if max_length and total_len > max_length:
             ids, pair_ids, overflowing_tokens = self.truncate_sequences(ids, pair_ids=pair_ids,
                                                                         num_tokens_to_remove=total_len-max_length,
