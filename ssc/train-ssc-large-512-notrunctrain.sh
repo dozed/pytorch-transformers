@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5 PYTHONPATH=.. python3 ../examples/run_glue.py \
+CUDA_VISIBLE_DEVICES=2,3,4,5,6,7 PYTHONPATH=.. python3 ../examples/run_glue.py \
   --task_name ssc \
   --do_train \
   --do_eval \
@@ -9,7 +9,8 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5 PYTHONPATH=.. python3 ../examples/run_glue.py \
   --model_type bert \
   --model_name_or_path bert-large-uncased \
   --max_seq_length 512 \
-  --per_gpu_train_batch_size 32 \
+  --per_gpu_train_batch_size 8 \
+  --save_steps=0 \
   --filter_long_sequences_train \
   --learning_rate 2e-5 \
   --num_train_epochs 3.0 \

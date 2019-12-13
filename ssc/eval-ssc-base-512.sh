@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5 PYTHONPATH=.. python3 ../examples/run_glue.py \
+CUDA_VISIBLE_DEVICES=2,3,4,5,6,7 PYTHONPATH=.. python3 ../examples/run_glue.py \
   --task_name ssc \
   --do_train \
   --do_eval \
